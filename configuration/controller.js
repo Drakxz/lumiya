@@ -1,5 +1,5 @@
 const {
-  ModalBuilder,LabelBuilder,TextInputBuilder,TextInputStyle,FileUploadBuilder,
+  ModalBuilder,LabelBuilder,FileUploadBuilder,
   MessageFlags,PermissionFlagsBits
 }=require("discord.js");
 const {privateCommand,panelsForSystem}=require("./systems");

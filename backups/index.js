@@ -7,7 +7,7 @@ const {
   MessageFlags,PermissionFlagsBits
 }=require("discord.js");
   const {BackupStore}=require("./store");
-const {encode,decode}=require("./archive");
+const {decode}=require("./archive");
 const engine=require("./engine");
 const {serverName}=require("../brand");
 const {errorText,statusText,safeMessage}=require("../error-ui");

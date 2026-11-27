@@ -1,4 +1,3 @@
-const { randomUUID } = require("node:crypto");
 const { AuditLogEvent, PermissionFlagsBits } = require("discord.js");
 const createStore = require("./store");
 

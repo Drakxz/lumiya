@@ -3,7 +3,7 @@ const fs=require("node:fs/promises");
 const path=require("node:path");
 const os=require("node:os");
 const {
-  ContainerBuilder,TextDisplayBuilder,SeparatorBuilder,SeparatorSpacingSize,SectionBuilder,ThumbnailBuilder,
+  ContainerBuilder,TextDisplayBuilder,SeparatorBuilder,SeparatorSpacingSize,SectionBuilder,
   ActionRowBuilder,ButtonBuilder,ButtonStyle,StringSelectMenuBuilder,ChannelSelectMenuBuilder,RoleSelectMenuBuilder,
   ChannelType,MessageFlags,PermissionFlagsBits,ModalBuilder,LabelBuilder,TextInputBuilder,TextInputStyle
 }=require("discord.js");

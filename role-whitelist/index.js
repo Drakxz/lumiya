@@ -1,7 +1,7 @@
 const {
   ContainerBuilder,SectionBuilder,ThumbnailBuilder,TextDisplayBuilder,SeparatorBuilder,SeparatorSpacingSize,
   ActionRowBuilder,ButtonBuilder,ButtonStyle,UserSelectMenuBuilder,RoleSelectMenuBuilder,StringSelectMenuBuilder,
-  ModalBuilder,LabelBuilder,TextInputBuilder,TextInputStyle,MessageFlags,PermissionFlagsBits,SlashCommandBuilder
+  ModalBuilder,LabelBuilder,TextInputBuilder,TextInputStyle,MessageFlags,PermissionFlagsBits
 }=require("discord.js");
 const {RoleWhitelistStore}=require("./store");
 const {serverName}=require("../brand");

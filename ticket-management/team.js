@@ -1,4 +1,4 @@
-const {SectionBuilder,StringSelectMenuBuilder,UserSelectMenuBuilder,ModalBuilder,LabelBuilder,TextInputBuilder,TextInputStyle,PermissionFlagsBits,ButtonStyle}=require('discord.js');
+const {StringSelectMenuBuilder,UserSelectMenuBuilder,ModalBuilder,LabelBuilder,TextInputBuilder,TextInputStyle,PermissionFlagsBits,ButtonStyle}=require('discord.js');
 const {randomUUID}=require('node:crypto');
 const {weekStart,weekLabel,WEEK_MS}=require('../voice-hours/time');
 const {divider,safeText,shorten}=require('./appearance');

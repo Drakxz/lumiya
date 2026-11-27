@@ -74,7 +74,6 @@ const commands = require("./command-system/registry").getCommandRegistry(client,
 });
 
 const STAFF_ROLE_ID = process.env.STAFF_ROLE_ID;
-const CATEGORY_ID = process.env.CATEGORY_ID;
 
 function cargosDoServidor(guild) {
   return [...guild.roles.cache.values()].filter(role =>
@@ -2850,6 +2849,7 @@ for (const fechar of [
   voicePresence.close,
   nukeCanal.close
 ]) if (typeof fechar === "function") horasCall.beforeShutdown(fechar);
+// Ponto de extensão opcional: comandos locais em commands/ são carregados se o diretório existir.
 commands.loadDirectory(path.join(__dirname, "commands"), { horasCall, fichaCargos });
 
 client.login(process.env.DISCORD_TOKEN).catch(error => anticrash.loginFailure(error));
