@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:orientation="vertical" android:gravity="center" android:padding="24dp"
+  android:layout_width="match_parent" android:layout_height="match_parent">
+  <TextView android:text="Fotografias da comunidade" android:textSize="22sp"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+  <Button android:id="@+id/login" android:text="Entrar com Discord"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_marginTop="24dp"/>
+  <TextView android:id="@+id/status" android:text="Pronto."
+    android:accessibilityLiveRegion="polite" android:gravity="center"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"/>
+  <Button android:id="@+id/cancel" android:text="Cancelar login" android:visibility="gone"
+    android:minHeight="48dp" android:layout_marginTop="16dp"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+  <Button android:id="@+id/browser" android:text="Entrar pelo navegador" android:minHeight="48dp"
+    android:layout_marginTop="16dp"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+</LinearLayout>

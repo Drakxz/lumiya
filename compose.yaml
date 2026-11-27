@@ -1,0 +1,28 @@
+services:
+  bot:
+    build: .
+    init: true
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      WEB_HOST: 0.0.0.0
+      PORT: "3000"
+      CALL_STATS_FILE: /app/database/call-stats.sqlite
+      STORAGE_PATH: /app/database/instagram-web-private
+      DATA_FILE: /app/state/data.json
+      ROLE_HISTORY_FILE: /app/state/role-history.json
+      WEB_TRUST_PROXY: 172.30.0.1/32
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./database:/app/database
+      - ./state:/app/state
+      - ./logs:/app/logs
+    stop_grace_period: 30s
+    networks:
+      - community
+networks:
+  community:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

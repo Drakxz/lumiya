@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>sla · Control center</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,"Segoe UI",sans-serif;background:#0c0d10;color:#e8e9ed;--panel:#121318;--raised:#191a21;--line:#24252e;--muted:#8e909f;--accent:#a99afb;--green:#80cba5}
+*{box-sizing:border-box}body{margin:0;font-size:13px}button,input,select,textarea{font:inherit}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button{cursor:pointer;border:1px solid var(--line);background:#1b1c24;color:#dbdce5;border-radius:7px;padding:9px 12px;font-size:12px;font-weight:550;transition:background .15s,border-color .15s}
+button:hover:not(:disabled){background:#252631;border-color:#3a3b49}button:disabled{opacity:.4;cursor:not-allowed}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.primary{background:#b0a1ff;color:#151123;border-color:#b0a1ff}.primary:hover:not(:disabled){background:#c2b6ff;border-color:#c2b6ff}.quiet{background:transparent}.danger{color:#efa1ad}.icon-button{padding:7px 10px}.icon{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;vertical-align:middle;flex-shrink:0}
+button .icon{margin-right:6px}.icon-button .icon{margin:0}.button-label{vertical-align:middle}
+aside{position:fixed;inset:0 auto 0 0;width:222px;border-right:1px solid var(--line);padding:22px 13px;background:#101115;display:flex;flex-direction:column;z-index:10}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 11px;font-size:23px;font-weight:650;letter-spacing:-1px}.logo{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#242032;color:#c7baff;font-size:24px}
+.workspace{border:1px solid #292a34;border-radius:8px;padding:11px;margin:27px 4px 20px;display:flex;align-items:center;gap:9px;font-size:12px}.workspace small{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+.workspace-icon{background:#262830;border-radius:6px;width:29px;height:29px;display:grid;place-items:center;color:#babdcb}
+.eyebrow{font-size:9px;text-transform:uppercase;letter-spacing:1.4px;color:#737584;margin:20px 12px 10px}
+.nav{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;color:#9395a5;border-radius:6px;padding:10px 12px;margin:3px 0;font-size:12px;font-weight:450}
+.nav:hover:not(:disabled){background:#1b1c23}.nav.active{background:#23202f;color:#c6baff}.nav .nav-count{margin-left:auto;font-size:10px;padding:1px 6px;background:#ffffff09;border-radius:4px}
+.sidebar-bottom{margin-top:auto;padding:16px 12px 0;border-top:1px solid var(--line);color:var(--muted);font-size:10px;line-height:1.8}.dot{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:6px}
+.topbar{height:60px;margin-left:222px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 34px;color:#9c9eae;font-size:11px}
+.topbar strong{font-weight:450;color:#d5d7e1}.slash{margin:0 10px;color:#4f5262}.command-trigger{font-size:11px;padding:7px 10px;color:#999bab;display:flex;align-items:center;gap:15px;background:#14151b}
+kbd{font-family:inherit;font-size:9px;color:#9699ad;border:1px solid #363745;border-radius:4px;padding:2px 4px}.top-right{display:flex;gap:17px;align-items:center}.secure-badge{font-size:10px;color:#9aa1ae}
+main{margin-left:222px;padding:31px 34px 24px;max-width:1800px}
+.page-head{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:25px}h1{margin:0 0 8px;font-size:25px;font-weight:580;letter-spacing:-.8px}
+p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}h2{font-size:13px;font-weight:550;margin:0}h3{font-size:13px;font-weight:550;margin:0}
+.actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-bottom:22px}
+.stat{padding:20px 23px;border-right:1px solid var(--line)}.stat:last-child{border:0}.stat-label{display:flex;align-items:center;justify-content:space-between;color:#9597a6;font-size:10px}
+.stat-number{font-size:29px;font-weight:500;letter-spacing:-1px;display:block;margin:12px 0 6px}.stat small{font-size:10px;color:#666b7e}
+.overview-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(270px,1fr);gap:18px;margin-bottom:20px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}.panel-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}.panel-head p{font-size:10px;margin-top:5px}
+.panel-body{padding:20px}.hero-panel{background:linear-gradient(120deg,#1c182c,#14141c);padding:25px;margin-bottom:20px;border:1px solid #302a44;border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:25px}
+.hero-panel h2{font-size:19px;letter-spacing:-.5px;margin-bottom:8px}.hero-panel p{max-width:470px;font-size:11px;color:#a49bb7}.hero-badge{color:#bcacee;background:#ac8aff0d;border:1px solid #433750;border-radius:6px;font-size:10px;padding:7px 10px;white-space:nowrap}
+.distribution{display:flex;gap:4px;height:10px;border-radius:4px;overflow:hidden;background:#222530;margin:14px 0 20px}.distribution span{min-width:0;border-radius:2px;transition:width .2s}.legend{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #20222b;font-size:11px;color:#9a9eaf}.legend:last-child{border:0}.legend b{font-weight:500;color:#e1e3ee}
+.toolbar{display:flex;gap:9px;align-items:center;margin-bottom:17px;flex-wrap:wrap}.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#121319;padding:0 11px;border-radius:7px;min-width:190px;max-width:360px;flex:1;color:#686d82}
+.search input{border:0;background:transparent;padding:10px 0;font-size:11px;outline:none!important}.toolbar select{width:auto;min-width:125px;font-size:11px}.spacer{flex:1}.result-count{font-size:10px;color:#777c91}
+input,select,textarea{font-size:12px;width:100%;padding:10px 12px;border:1px solid #30323f;background:#111218;border-radius:7px;color:#dcdfed}input::placeholder,textarea::placeholder{color:#626879}
+textarea{min-height:65px;resize:vertical}input[type=checkbox]{width:16px;height:16px;accent-color:#a899fa}
+#feedback{font-size:11px;color:#ecbc9e;background:#2a201b;border:1px solid #514033;border-radius:8px;padding:12px 15px;margin-bottom:18px}#feedback[data-ok=true]{color:#a0d8bc;background:#17271f;border-color:#2b4739}#feedback:empty{display:none}
+#accounts,#presence-accounts{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.account{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:19px;min-width:0;transition:border-color .15s}.account:hover{border-color:#3a374c}
+.account-head{display:flex;align-items:center;gap:10px}.avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;overflow:hidden;background:#2b263b;color:#c7b8f7;font-size:12px;font-weight:600;flex-shrink:0}.avatar img{width:100%;height:100%;display:block;object-fit:cover}
+.identity{flex:1;min-width:0}.identity h3{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:5px}.status{font-size:10px;color:#8c93a6}.status::before{content:"";width:5px;height:5px;display:inline-block;background:#6a7083;border-radius:50%;margin-right:5px;vertical-align:middle}
+.status[data-state=connected],.status[data-state=online]{color:#85cba7}.status[data-state=connected]::before,.status[data-state=online]::before{background:#73c196}.status[data-state=error]{color:#e298aa}.status[data-state=error]::before{background:#dc7b92}
+.status[data-state=connecting],.status[data-state=reconnecting]{color:#d8b97d}.favorite{border:0;background:transparent;padding:3px;color:#697086;font-size:16px}.favorite[data-active=true]{color:#dcba77}
+.channel{display:flex;align-items:center;justify-content:space-between;background:#0e0f14;border:1px solid #22242e;border-radius:6px;padding:10px 11px;margin:17px 0 13px;gap:6px}
+.channel label,.audio-label{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#71788e;display:block;margin:0 0 5px}.channel code{font-size:10px;color:#a8adc1;font-family:Consolas,monospace}.channel button{border:0;background:none;padding:4px;font-size:10px;color:#858da5}
+.segments{display:flex;gap:3px;padding:3px;border:1px solid #292b36;border-radius:7px}.segments button{flex:1;border:0;background:transparent;padding:7px 3px;font-size:9px;white-space:nowrap;color:#8e96ae;font-weight:450}
+.segments button.selected{background:#292439;color:#c0b2f7}.quick-controls{display:flex;gap:5px;margin-top:8px}.quick-controls button{flex:1;font-size:9px;padding:7px 3px;background:#171820;font-weight:450}
+.meta{display:flex;justify-content:space-between;gap:6px;font-size:9px;color:#737c94;margin:14px 0}.account-note{font-size:10px;color:#8a90a6;margin-top:10px;overflow-wrap:anywhere}.card-footer{display:flex;gap:5px;border-top:1px solid var(--line);padding-top:13px}.card-footer button{font-size:10px;padding:8px 10px}.connect{flex:1}
+.presence-preview{border:1px solid #2e293d;background:#1a1723;border-radius:8px;padding:13px;margin:17px 0}.presence-preview small{font-size:9px;color:#8d849d;display:block;margin-bottom:7px}.presence-preview b{font-size:12px;font-weight:500;color:#c8bae9}
+.empty{padding:45px 18px;text-align:center;grid-column:1/-1;border:1px dashed #2e303e;border-radius:9px}.empty h3{margin-bottom:9px}.empty p{font-size:11px;margin-bottom:15px}
+.event{display:flex;align-items:flex-start;gap:11px;padding:14px 20px;border-bottom:1px solid #22232d}.event:last-child{border:0}.event-mark{width:25px;height:25px;background:#20212c;border:1px solid #30313d;border-radius:7px;display:grid;place-items:center;color:#a397cf;flex-shrink:0;font-size:11px}
+.event-text{flex:1;min-width:0}.event-text b{display:block;font-size:11px;font-weight:500;color:#d0d3e1}.event-text p{font-size:10px;color:#777f96;margin-top:4px;overflow-wrap:anywhere}.event time{font-size:9px;color:#6f768c;white-space:nowrap;margin-top:3px}
+.mini-account{display:flex;gap:11px;align-items:center;padding:13px 20px;border-bottom:1px solid var(--line)}.mini-account:last-child{border:0}.mini-account .avatar{width:29px;height:29px;border-radius:8px;font-size:10px}.mini-account b{font-size:11px;font-weight:500}.mini-account p{font-size:9px}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.setting-row{display:flex;gap:20px;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid #24252e}.setting-row:last-child{border:0}.setting-row label{font-size:11px;color:#c7ccdc}.setting-row p{font-size:10px;margin-top:5px}.setting-row select{max-width:150px;font-size:11px}
+.diagnostic{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px;color:#858da5}.diagnostic strong{font-weight:450;color:#c1c8dc}.diagnostic:last-child{border:0}
+.footnote{font-size:9px;color:#646c82;line-height:1.8;margin-top:26px;max-width:900px}.small{font-size:10px;padding:6px 9px}
+dialog{padding:0;background:#15161e;border:1px solid #363444;border-radius:12px;color:#e4e6ef;box-shadow:0 30px 120px #0008;width:485px;max-width:calc(100vw - 28px);max-height:90vh}
+dialog::backdrop{background:#05060bb8;backdrop-filter:blur(4px)}.dialog-head{padding:22px 24px 15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}.dialog-head h2{font-size:16px;font-weight:550;letter-spacing:-.4px}
+form{padding:5px 24px 24px}form label{font-size:11px;display:block;color:#b6bdd0;margin:16px 0 8px}form small{font-size:10px;display:block;color:#7a839b;line-height:1.6;margin-top:7px}.field-row{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:18px 0}.field-row label{margin:0}.form-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.form-error{font-size:11px;color:#e99eae;line-height:1.6;margin-top:12px}.section-hint{font-size:10px;letter-spacing:1px;text-transform:uppercase;color:#8d81b0;padding:18px 0 0}
+#command-dialog{width:570px;margin-top:12vh}#command-search{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:19px;font-size:14px;background:transparent}
+#command-results{padding:7px;max-height:340px;overflow:auto}#command-results button{display:flex;width:100%;text-align:left;border:0;background:none;align-items:center;gap:11px;padding:12px;font-size:12px}#command-results button.selected{background:#2a243c;color:#c9b8ff}
+.command-footer{font-size:9px;color:#747d95;padding:12px 19px;border-top:1px solid var(--line)}.confirmation{padding:22px 24px}.confirmation p{font-size:12px;color:#a3aac0}
+body.compact .account{padding:14px}body.compact .channel{margin:12px 0 9px}body.compact .quick-controls,body.compact .account-note{display:none}
+[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:1150px){main{padding:28px 23px}.topbar{padding:0 23px}.overview-grid{grid-template-columns:1fr 1fr}.stat{padding:18px}}
+@media(max-width:850px){aside{width:178px}.brand{font-size:21px}main,.topbar{margin-left:178px}.overview-grid,.settings-grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.stat:nth-child(2){border-right:0}.stat:nth-child(-n+2){border-bottom:1px solid var(--line)}.secure-badge{display:none}}
+@media(max-width:620px){aside{position:static;width:100%;padding:15px 16px 8px;border-right:0;border-bottom:1px solid var(--line)}.brand{font-size:21px}.workspace,.eyebrow,.sidebar-bottom{display:none}.nav-items{display:flex;overflow:auto;margin-top:14px}.nav{width:auto;white-space:nowrap;font-size:10px;padding:9px 11px}.nav .nav-count{display:none}.topbar{margin:0;height:48px;padding:0 18px}.topbar .command-trigger{font-size:10px;gap:8px}main{margin:0;padding:23px 17px}.page-head{align-items:flex-start}h1{font-size:22px}.page-head .actions{flex-direction:column;align-items:stretch}.stats{margin-bottom:17px}.stat{padding:16px}.stat-number{font-size:25px}.hero-panel{padding:20px}.hero-panel h2{font-size:16px}.hero-badge{display:none}#accounts,#presence-accounts{grid-template-columns:1fr}.spacer{display:none}.toolbar .search{max-width:none}.event time{font-size:8px}dialog{max-height:92vh}}
+</style>
+</head>
+<body>
+<aside>
+  <div class="brand"><span class="logo">s</span>sla<span class="result-count">/ console</span></div>
+  <div class="workspace"><span class="workspace-icon">⌘</span><div>Workspace pessoal<small><span class="dot"></span>Apenas neste computador</small></div></div>
+  <div class="eyebrow">Gerenciamento</div>
+  <nav class="nav-items" aria-label="Navegação principal">
+    <button class="nav active" data-nav="overview">◫ <span>Visão geral</span></button>
+    <button class="nav" data-nav="all">▦ <span>Contas e calls</span><span class="nav-count" id="nav-total">0</span></button>
+    <button class="nav" data-nav="presence">◉ <span>Status e atividades</span></button>
+    <button class="nav" data-nav="history">↳ <span>Histórico de ações</span></button>
+    <button class="nav" data-nav="settings">⚙ <span>Configurações</span></button>
+  </nav>
+  <div class="eyebrow">Coleções</div>
+  <nav class="nav-items" aria-label="Coleções">
+    <button class="nav" data-nav="favorites">☆ <span>Favoritas</span></button>
+    <button class="nav" data-nav="connected">↗ <span>Conectadas</span></button>
+  </nav>
+  <div class="sidebar-bottom"><span class="dot"></span>Cofre criptografado ativo<br>Credenciais nunca são exibidas.<br><span class="result-count">sla · local control center</span></div>
+</aside>
+<div class="topbar"><div>Workspace <span class="slash">/</span><strong id="breadcrumb">Visão geral</strong></div><div class="top-right"><span class="secure-badge">◇ Sessão local protegida</span><button id="command-open" class="command-trigger">Buscar e executar <kbd>Ctrl K</kbd></button></div></div>
+<main>
+  <header class="page-head">
+    <div><h1 id="page-title">Seu workspace, sob controle.</h1><p id="page-description">Uma visão clara das contas, conexões e atividades.</p></div>
+    <div class="actions"><button id="refresh">↻ Atualizar</button><button id="add" class="primary">+ Nova conta</button></div>
+  </header>
+  <div id="feedback" role="status" aria-live="polite"></div>
+  <section class="stats" aria-label="Resumo">
+    <div class="stat"><div class="stat-label">Contas cadastradas <span>▦</span></div><span class="stat-number" id="stat-total">—</span><small>Até 20 contas por workspace</small></div>
+    <div class="stat"><div class="stat-label">Sessões ativas <span>↗</span></div><span class="stat-number" id="stat-connected">—</span><small>Calls e presença online</small></div>
+    <div class="stat"><div class="stat-label">Em call agora <span>◌</span></div><span class="stat-number" id="stat-calls">—</span><small>Conexões de voz estabelecidas</small></div>
+    <div class="stat"><div class="stat-label">Precisam de atenção <span>!</span></div><span class="stat-number" id="stat-errors">—</span><small>Falhas de autenticação</small></div>
+  </section>
+  <section id="overview-view">
+    <div class="hero-panel"><div><h2>Mais do que ficar em call.</h2><p>Gerencie status, personalize atividades e acompanhe suas ações. Use o modo somente presença quando não precisar de uma conexão de voz.</p></div><button class="hero-badge" id="explore-presence">Explorar status e atividades ↗</button></div>
+    <div class="overview-grid">
+      <div class="panel"><div class="panel-head"><div><h2>Atividade recente</h2><p>Ações realizadas neste painel, sem credenciais.</p></div><button id="view-history" class="small quiet">Ver tudo ↗</button></div><div id="recent-events"></div></div>
+      <div class="panel"><div class="panel-head"><div><h2>Distribuição de sessões</h2><p>Estado atual das contas cadastradas.</p></div><span class="dot"></span></div><div class="panel-body" id="distribution"></div></div>
+      <div class="panel"><div class="panel-head"><div><h2>Acesso rápido</h2><p>Suas contas favoritas.</p></div><button id="view-favorites" class="small quiet">Ver favoritas ↗</button></div><div id="favorite-accounts"></div></div>
+      <div class="panel"><div class="panel-head"><h2>Ambiente</h2><span class="result-count">EM TEMPO REAL</span></div><div class="panel-body" id="overview-system"></div></div>
+    </div>
+  </section>
+  <section id="accounts-view" hidden>
+    <div class="toolbar">
+      <div class="search"><span>⌕</span><input type="search" id="search" aria-label="Buscar contas" placeholder="Nome, call ou anotação…"></div>
+      <select id="filter" aria-label="Filtrar estado"><option value="all">Todos os estados</option><option value="connected">Em call</option><option value="online">Somente presença</option><option value="disconnected">Desconectadas</option><option value="error">Com falhas</option></select>
+      <span class="spacer"></span><button id="connect-all" class="small">Conectar todas</button><button id="disconnect-all" class="small">Desconectar todas</button><span id="result-count" class="result-count"></span>
+    </div>
+    <div id="accounts" aria-label="Contas cadastradas"></div>
+  </section>
+  <section id="presence-view" hidden><div id="presence-accounts"></div></section>
+  <section id="history-view" hidden><div class="toolbar"><div class="search"><span>⌕</span><input id="history-search" type="search" aria-label="Buscar no histórico" placeholder="Buscar conta ou ação…"></div><span class="spacer"></span><span class="result-count">Últimas 150 ações · armazenadas no cofre</span></div><div class="panel" id="history-list"></div></section>
+  <section id="settings-view" hidden>
+    <div class="settings-grid">
+      <div class="panel"><div class="panel-head"><h2>Preferências de interface</h2></div><div class="panel-body">
+        <div class="setting-row"><div><label for="density">Densidade dos cartões</label><p>Mais espaço ou mais informação.</p></div><select id="density"><option value="comfortable">Confortável</option><option value="compact">Compacta</option></select></div>
+        <div class="setting-row"><div><label for="refresh-rate">Atualização automática</label><p>Pausada quando a aba fica em segundo plano.</p></div><select id="refresh-rate"><option value="5000">A cada 5 s</option><option value="10000">A cada 10 s</option><option value="30000">A cada 30 s</option></select></div>
+        <div class="setting-row"><div><label>Atalhos de teclado</label><p><kbd>Ctrl K</kbd> Central de comandos · <kbd>Esc</kbd> Fechar</p></div></div>
+      </div></div>
+      <div class="panel"><div class="panel-head"><h2>Exportação e privacidade</h2></div><div class="panel-body">
+        <p>Exporte nomes, calls e preferências em JSON. O arquivo <strong>não inclui tokens, chaves de acesso ou dados de perfil</strong>. Não substitui o cofre de credenciais.</p>
+        <div class="actions" style="margin-top:18px"><button id="export-settings">↓ Exportar configurações</button></div>
+        <div class="diagnostic"><span>Armazenamento de credenciais</span><strong>Cofre criptografado</strong></div>
+        <div class="diagnostic"><span>Acesso pela rede</span><strong>Desativado · somente localhost</strong></div>
+        <p style="font-size:10px;margin-top:16px">Não compartilhe o link com a chave de acesso. O cofre usa DPAPI no Windows ou uma chave privada no Linux.</p>
+      </div></div>
+      <div class="panel"><div class="panel-head"><h2>Diagnóstico do ambiente</h2></div><div class="panel-body" id="settings-system"></div></div>
+      <div class="panel"><div class="panel-head"><h2>Sobre este painel</h2></div><div class="panel-body"><p><strong>sla / local control center</strong><br>Uma interface local para suas contas. Navegação e hierarquia visual inspiradas nos padrões do Linear e Vercel, sem dependências externas de interface.</p><p style="font-size:10px;margin-top:14px">O status configurado pode ser sobrescrito pelo cliente oficial. Automatizar contas pessoais pode violar as regras do Discord. Este painel não grava voz, captura o microfone ou remove punições da equipe.</p></div></div>
+    </div>
+  </section>
+  <footer class="footnote"><span class="dot"></span><span id="sync-status">Conectando ao painel…</span> · Credenciais protegidas · A conta principal do bot é gerenciada separadamente.</footer>
+</main>
+<dialog id="editor" aria-labelledby="form-title">
+  <div class="dialog-head"><h2 id="form-title">Nova conta</h2><button class="quiet icon-button" id="close-editor" aria-label="Fechar">×</button></div>
+  <form id="account-form" autocomplete="off">
+    <label for="name">Nome de identificação</label><input id="name" maxlength="60" required placeholder="Ex.: Conta de apoio">
+    <label for="token">Token da conta</label><input id="token" type="password" autocomplete="new-password" maxlength="512" required placeholder="Cole o token aqui"><small id="token-hint">Protegido por criptografia. Nunca aparece na lista.</small>
+    <div class="section-hint">Conexão</div>
+    <div class="field-row"><div><label for="join-call">Entrar em uma call</label><small>Desligue para manter somente a presença.</small></div><input id="join-call" type="checkbox" checked></div>
+    <div id="call-fields"><label for="channel">ID da call</label><input id="channel" inputmode="numeric" pattern="[0-9]{17,20}" maxlength="20" required placeholder="1571977809633615942">
+    <label for="audio-mode">Áudio ao conectar</label><select id="audio-mode"><option value="deafened">Microfone mutado + ensurdecido</option><option value="muted">Só microfone mutado</option><option value="open">Desmutado, sem ensurdecer</option></select></div>
+    <div class="field-row"><div><label for="auto-reconnect">Reconexão automática</label><small>Tentar voltar após quedas.</small></div><input type="checkbox" id="auto-reconnect" checked></div>
+    <label for="notes">Anotação <span class="result-count">opcional</span></label><textarea id="notes" maxlength="200" placeholder="Para que você usa esta conta?"></textarea>
+    <div id="form-error" class="form-error" role="alert"></div><small>Novas contas começam desconectadas.</small>
+    <div class="form-footer"><button type="button" id="cancel">Cancelar</button><button type="submit" class="primary" id="save">Salvar conta</button></div>
+  </form>
+</dialog>
+<dialog id="presence-editor" aria-labelledby="presence-title">
+  <div class="dialog-head"><h2 id="presence-title">Status e atividade</h2><button id="presence-close" class="quiet icon-button" aria-label="Fechar">×</button></div>
+  <form id="presence-form">
+    <p id="presence-account-name" style="margin-top:15px"></p>
+    <label for="presence-status">Como aparecer no Discord</label><select id="presence-status"><option value="online">Online</option><option value="idle">Ausente</option><option value="dnd">Não perturbe</option><option value="invisible">Invisível</option></select>
+    <label for="presence-type">Atividade</label><select id="presence-type"><option value="4">Status personalizado (texto no perfil)</option><option value="0">Jogando</option><option value="1">Transmitindo</option><option value="2">Ouvindo</option><option value="3">Assistindo</option><option value="5">Competindo</option></select>
+    <label for="presence-name">Nome da atividade <span class="result-count">opcional</span></label><input id="presence-name" maxlength="100" placeholder="Ex.: sla"><small>Deixe vazio para remover a atividade.</small>
+    <div id="stream-field" hidden><label for="presence-url">Link da transmissão</label><input id="presence-url" type="url" placeholder="https://www.twitch.tv/seucanal"><small>Transmitindo exige um link HTTPS da Twitch ou YouTube.</small></div>
+    <div class="presence-preview"><small>PRÉVIA DA CONFIGURAÇÃO</small><b id="presence-preview-text">Online</b></div>
+    <div id="presence-error" class="form-error" role="alert"></div><small>Salvo para a próxima conexão se a conta estiver desligada. Outros clientes podem sobrescrever a presença.</small>
+    <div class="form-footer"><button type="button" id="presence-cancel">Cancelar</button><button type="submit" class="primary" id="presence-save">Salvar presença</button></div>
+  </form>
+</dialog>
+<dialog id="command-dialog" aria-label="Central de comandos"><input id="command-search" role="combobox" aria-controls="command-results" aria-expanded="true" aria-autocomplete="list" autocomplete="off" placeholder="Ir para uma página ou executar uma ação…"><div id="command-results" role="listbox"></div><div class="command-footer">↑ ↓ navegar　↵ executar　Esc fechar</div></dialog>
+<dialog id="confirm-dialog" aria-labelledby="confirm-title"><div class="dialog-head"><h2 id="confirm-title">Confirmar ação</h2></div><div class="confirmation"><p id="confirm-description"></p><div class="form-footer"><button id="confirm-cancel">Cancelar</button><button id="confirm-ok" class="primary">Confirmar</button></div></div></dialog>
+<script src="/app.js"></script>
+</body>
+</html>

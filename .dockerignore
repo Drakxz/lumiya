@@ -1,0 +1,16 @@
+node_modules
+**/node_modules
+.env
+.env.*
+!.env.example
+.bot-instance.lock
+data.json
+role-history.json
+database
+state
+logs
+backups/files
+instagram-web/frontend/dist
+**/test-results
+**/playwright-report
+**/*.tsbuildinfo

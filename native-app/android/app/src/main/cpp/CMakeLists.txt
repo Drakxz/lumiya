@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.22.1)
+project(discord_auth)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(NOT EXISTS "${DISCORD_SDK_INCLUDE_DIR}/discordpp.h")
+  message(FATAL_ERROR "Instale os headers do Discord Social SDK em native-app/sdk/include.")
+endif()
+find_package(discord_partner_sdk REQUIRED CONFIG)
+add_library(discord_auth SHARED discord_auth.cpp)
+target_include_directories(discord_auth PRIVATE "${DISCORD_SDK_INCLUDE_DIR}")
+target_link_libraries(discord_auth discord_partner_sdk::discord_partner_sdk)

@@ -1,0 +1,11 @@
+sdk/
+android/.gradle/
+android/.cxx/
+android/local.properties
+**/build/
+ios/*.xcodeproj/
+ios/DerivedData/
+*.jks
+*.keystore
+*.p12
+*.mobileprovision

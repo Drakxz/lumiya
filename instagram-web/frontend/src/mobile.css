@@ -1,0 +1,160 @@
+/* Mobile corrections only. The incumbent desktop design remains unchanged. */
+.mobile-nav-backdrop,.mobile-nav-close{display:none}
+
+@media(max-height:600px){
+  .sidebar{overflow-y:auto;overscroll-behavior:contain}
+  .sidebar>.brand,.sidebar>.navlabel,.sidebar>nav,.sidebar-bottom{flex-shrink:0}
+  .sidebar .brand{margin-bottom:24px}
+  .sidebar-bottom{padding-top:20px}
+}
+
+@media(max-width:800px){
+  .shell,.content,.composer,.editor,.preview-column,.fieldgrid,.settings-form,
+  .pagehead>div,.section-title>div,.profile-page,.profile-layout{min-width:0}
+  .content{padding:28px 20px 40px}
+  button,.button{min-height:44px}
+  button.icon,.button.icon,.textbutton{min-width:44px;min-height:44px}
+  input:not([type="checkbox"]):not([type="radio"]),textarea,select{font-size:16px;max-width:100%;min-width:0}
+  input:not([type="checkbox"]):not([type="radio"]),select:not([multiple]){min-height:44px}
+  .check{align-items:flex-start;min-height:44px;padding:8px 0}
+  .check input{width:20px;height:20px;margin-top:2px}
+  svg{flex-shrink:0}
+  .notice,.pagehead h1,.profile-name h2,.profile-role,.site-preview,.prewrap{overflow-wrap:anywhere}
+  .pagehead h1{font-size:clamp(25px,6.4vw,32px)}
+  .pagehead p{font-size:14px}
+  .pagehead,.section-title{gap:12px}
+
+  /* Keep the current page, destination and notification control within reach. */
+  .topbar{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:6px;min-height:64px;height:auto;padding:8px 12px}
+  .topbar>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar>.actions{gap:4px;flex-wrap:nowrap;min-width:0}
+  .topbar .destination-switch{max-width:clamp(70px,24vw,160px);min-width:0;padding:8px;gap:4px}
+  .destination-switch>span{min-width:0;max-width:none}
+  .topbar .avatar{width:28px;height:28px}
+
+  /* A dismissible, scrollable navigation drawer, including short landscape screens. */
+  .mobile-nav-backdrop{display:block;position:fixed;inset:0;z-index:29;background:#0009}
+  .sidebar.open{width:min(300px,calc(100vw - 48px));height:100dvh;overflow-y:auto;overscroll-behavior:contain;padding:20px 16px max(20px,env(safe-area-inset-bottom));box-shadow:12px 0 40px #0007}
+  .mobile-nav-close{display:flex;position:absolute;top:12px;right:10px}
+  .sidebar .brand{max-width:calc(100% - 48px);margin-bottom:28px}
+  .sidebar nav button{min-height:44px}
+  .sidebar-bottom{padding-top:28px}
+
+  /* Public landing: undo the desktop overrides which were winning on phones. */
+  .landing-nav{padding:18px 20px;gap:12px}
+  .landing-nav .brand{min-width:0;max-width:65%;font-size:14px}
+  .brandmark{flex-shrink:0}
+  .landing-nav .brand>span:last-child{overflow-wrap:anywhere;min-width:0}
+  .landing-nav>.actions{flex-shrink:0}
+  .landing-nav .button{min-height:44px;padding:10px 14px}
+  .landing{padding:12px 20px 0}
+  .landing-hero{padding:20px 0 36px;gap:28px}
+  .landing h1{font-size:clamp(34px,8.8vw,62px);letter-spacing:-.04em;line-height:1.1}
+  .hero-copy>p{font-size:14px;margin:20px 0 24px}
+  .hero-copy .actions{gap:8px}
+  .hero-copy .actions .button{padding:12px 16px;font-size:13px}
+  .hero-assurance{align-items:flex-start;font-size:11px;line-height:1.6}
+  .hero-assurance svg{margin-top:2px}
+  .moment-stage{width:100%;height:auto;min-height:0;margin:0}
+  .moment-card.moment-front{width:100%;max-width:420px}
+  .moment-photo{height:auto;aspect-ratio:4/3}
+  .moment-photo>img{display:block}
+  .moment-caption>div{min-width:0}
+  .moment-caption strong{overflow-wrap:anywhere;white-space:normal}
+  .photo-tag{max-width:calc(100% - 24px);font-size:9px}
+  .community-strip>div{flex-wrap:wrap;gap:10px}
+  .community-feature{padding:24px 20px;gap:28px}
+  .community-feature h2{overflow-wrap:anywhere}
+  .steps-grid article{padding:24px}
+  .landing-cta{padding:52px 0}
+  .landing-footer{margin:0 20px;padding:20px 0;flex-wrap:wrap}
+  .landing-footer nav{flex-wrap:wrap;gap:8px 16px}
+  .landing-footer nav button{min-height:44px}
+  .server-choice{padding:40px 20px}
+  .server-choice-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  .server-choice-card{max-width:100%}
+  .server-choice-card>strong{font-size:18px}
+  .server-choice-card>small{font-size:12px;white-space:normal}
+  .server-choice-action{font-size:12px}
+  .server-choice .hero-tag{max-width:100%;letter-spacing:.04em;font-size:10px}
+
+  /* The member's photograph must remain a photograph, not a faded watermark. */
+  .dashboard-hero{flex-direction:column;align-items:stretch;padding:24px;gap:20px}
+  .dashboard-hero>div:first-child{min-width:0}
+  .dashboard-hero h2{font-size:clamp(25px,6.5vw,36px);line-height:1.2;letter-spacing:-.035em}
+  .dashboard-hero p{max-width:none;font-size:13px}
+  .dashboard-hero .primary{max-width:100%;flex-wrap:wrap}
+  .dashboard-art{position:relative;inset:auto;flex:0 0 auto;width:min(100%,260px);height:235px;align-self:center;opacity:1;transform:none;z-index:auto;pointer-events:auto}
+  .dashboard-photo{inset:10px 16px 20px;transform:rotate(4deg)}
+  .dashboard-heart{left:0;bottom:5px}
+  .dashboard-spark{right:0;top:0}
+  .home-stats{gap:10px}
+  .home-stats .stat{min-width:0;padding:16px 14px}
+  .home-stats .stat>span{font-size:12px;padding-right:0;line-height:1.5}
+  .home-stats .stat-icon{position:static;margin-bottom:8px}
+  .home-stats .stat strong{font-size:28px}
+  .home-stats .stat small{font-size:11px;overflow-wrap:anywhere}
+  .quiet-note{display:grid;grid-template-columns:20px minmax(0,1fr);align-items:start;gap:12px;padding:18px}
+  .quiet-note .textbutton{grid-column:2;margin-left:0;justify-self:start;white-space:normal}
+
+  .filters{display:flex;flex-wrap:wrap;gap:10px}
+  .filters input,.filters>select{width:100%;max-width:100%;flex:1 1 100%}
+  .tabs{flex-wrap:wrap}
+  .tabs button{font-size:12px;min-height:44px;padding:10px 12px}
+  .table-wrap{max-width:100%;overflow-x:auto}
+  .settings-form{width:100%;max-width:100%}
+  .settings-form label{overflow-wrap:anywhere}
+  .fieldgrid{grid-template-columns:minmax(0,1fr)}
+  .dropzone{min-width:0;padding:20px 14px}
+  .dropzone input[type="file"]{font-size:13px;padding:8px;min-width:0}
+  .dropzone input::file-selector-button{font:inherit;min-height:36px;margin-right:6px}
+  .editor h2{flex-wrap:wrap}
+  .preview-column{min-width:0}
+  .discord-preview{overflow-wrap:anywhere}
+  .photo-item{flex-wrap:wrap;min-width:0}
+  .photo-item>.actions{flex-wrap:wrap}
+  .modal{max-height:calc(100dvh - 32px);overflow-y:auto;padding:24px 20px}
+  .overlay{padding:16px}
+  .modal .actions{flex-wrap:wrap}
+  .toast{bottom:max(16px,env(safe-area-inset-bottom));width:max-content;max-width:calc(100vw - 32px);overflow-wrap:anywhere}
+  .profile-identity{min-width:0}
+  .profile-discord-link{max-width:100%;white-space:normal}
+  .profile-section-heading{flex-wrap:wrap}
+  .profile-metrics>div{min-width:0}
+  .profile-metrics>div>span{font-size:11px;flex-wrap:wrap;line-height:1.5}
+  .profile-metrics strong{font-size:25px}
+  .profile-metrics strong small{font-size:10px}
+  .profile-username{font-size:12px}
+  .profile-section-heading p,.profile-achievement p,.profile-toggle small{font-size:12px}
+  .profile-toggle{min-height:44px}
+  footer{flex-wrap:wrap;gap:12px;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom))}
+  footer nav{flex-wrap:wrap}
+  footer button{min-height:44px}
+}
+
+@media(max-width:480px){
+  .hero-copy .actions{display:grid;grid-template-columns:minmax(0,1fr)}
+  .hero-copy .actions .button{width:100%;justify-content:center}
+  .community-strip{gap:12px}
+  .community-strip>a{margin-left:0;min-width:44px;min-height:44px;align-items:center;justify-content:center}
+  .community-strip>div{flex:1 1 0;font-size:11px;min-width:0}
+  .profile-identity{display:grid;grid-template-columns:72px minmax(0,1fr);gap:12px;padding:0 16px}
+  .profile-avatar{width:72px;height:72px;border-radius:22px}
+  .profile-name{padding-top:42px}
+  .profile-name h2{font-size:24px}
+  .profile-discord-link{grid-column:1/-1;justify-self:start;margin:8px 0 0}
+  .profile-meta{padding:20px 16px}
+  .profile-metrics>div{padding:16px 10px}
+  .profile-metrics>div>span svg{display:none}
+  .profile-name .eyebrow{font-size:9px;letter-spacing:.08em}
+  .profile-section{padding:20px 16px}
+  .profile-handle-input{padding:0 10px}
+  .postrow{display:grid;grid-template-columns:42px minmax(0,1fr);gap:10px;padding:16px}
+  .postinfo{min-width:0}
+  .postinfo strong{white-space:normal;overflow-wrap:anywhere}
+  .postrow>.badge{grid-column:2;margin-left:0;justify-self:start;max-width:100%;white-space:normal}
+  .rowactions{grid-column:1/-1;max-width:none;justify-content:flex-start;gap:4px}
+  .rowactions .icon{width:44px;height:44px}
+  .saved-preview-toolbar{flex-wrap:wrap}
+  .section-title .textbutton{flex-shrink:0}
+}
