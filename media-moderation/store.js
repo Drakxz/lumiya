@@ -7,6 +7,7 @@ function createStore(db){
     CREATE TABLE IF NOT EXISTS media_moderation_channels(guildId TEXT NOT NULL,channelId TEXT NOT NULL,kind TEXT NOT NULL CHECK(kind IN ('channel','category','exclude')),PRIMARY KEY(guildId,channelId,kind));
     CREATE TABLE IF NOT EXISTS media_moderation_cases(id TEXT PRIMARY KEY,guildId TEXT NOT NULL,channelId TEXT NOT NULL,authorId TEXT NOT NULL,originalMessageId TEXT NOT NULL,mediaType TEXT NOT NULL,createdAt INTEGER NOT NULL,status TEXT NOT NULL,decision TEXT,reason TEXT,categories TEXT NOT NULL DEFAULT '[]',model TEXT,rulesVersion TEXT NOT NULL,reviewerId TEXT,repostedMessageId TEXT,filePath TEXT,filename TEXT,mimeType TEXT,caption TEXT,sha256 TEXT,requestId TEXT);
     CREATE INDEX IF NOT EXISTS media_cases_queue ON media_moderation_cases(guildId,status,createdAt);
+    CREATE INDEX IF NOT EXISTS media_cases_original ON media_moderation_cases(originalMessageId);
     CREATE TABLE IF NOT EXISTS media_moderation_budget(guildId TEXT NOT NULL,day TEXT NOT NULL,requests INTEGER NOT NULL DEFAULT 0,estimatedCost REAL NOT NULL DEFAULT 0,PRIMARY KEY(guildId,day));
     CREATE TABLE IF NOT EXISTS media_moderation_hashes(guildId TEXT NOT NULL,sha256 TEXT NOT NULL,decision TEXT NOT NULL,rulesVersion TEXT NOT NULL,createdAt INTEGER NOT NULL,PRIMARY KEY(guildId,sha256,rulesVersion));
   `);

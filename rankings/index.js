@@ -16,6 +16,7 @@ let cleanupRegistrado = false;
 module.exports = function installRankings({ client, registry, db }) {
   db.exec(`CREATE TABLE IF NOT EXISTS ranking_messages(guildId TEXT NOT NULL,userId TEXT NOT NULL,total INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(guildId,userId));
     CREATE TABLE IF NOT EXISTS ranking_message_seen(messageId TEXT PRIMARY KEY,createdAt INTEGER NOT NULL);
+    CREATE INDEX IF NOT EXISTS ranking_seen_time ON ranking_message_seen(createdAt);
     CREATE TABLE IF NOT EXISTS ranking_panels(guildId TEXT PRIMARY KEY,channelId TEXT NOT NULL,messageId TEXT NOT NULL,userId TEXT NOT NULL,paused INTEGER NOT NULL DEFAULT 0,updatedAt INTEGER NOT NULL);`);
   const savePanel = db.prepare(`INSERT INTO ranking_panels VALUES(?,?,?,?,?,?)
     ON CONFLICT(guildId) DO UPDATE SET channelId=excluded.channelId,messageId=excluded.messageId,userId=excluded.userId,paused=excluded.paused,updatedAt=excluded.updatedAt`);
@@ -26,7 +27,6 @@ module.exports = function installRankings({ client, registry, db }) {
     try {
       const inserted = db.prepare("INSERT OR IGNORE INTO ranking_message_seen VALUES(?,?)").run(m.id, Date.now());
       if (inserted.changes) db.prepare("INSERT INTO ranking_messages VALUES(?,?,1) ON CONFLICT(guildId,userId) DO UPDATE SET total=total+1").run(m.guildId, m.author.id);
-      db.prepare("DELETE FROM ranking_message_seen WHERE createdAt<?").run(Date.now() - 7 * 86400000);
       db.exec("COMMIT");
     } catch (error) { db.exec("ROLLBACK"); console.warn("[Rankings] Falha ao contar mensagem:", error.message); }
   }
@@ -93,7 +93,13 @@ module.exports = function installRankings({ client, registry, db }) {
       else console.warn("[Rankings] Falha ao atualizar painel ao vivo:", error.message);
     } finally { emEdicao.delete(id); }
   }
+  let ultimaLimpeza = 0;
   const timer = setInterval(() => {
+    const agora = Date.now();
+    if (agora - ultimaLimpeza > 3600000) {
+      ultimaLimpeza = agora;
+      db.prepare("DELETE FROM ranking_message_seen WHERE createdAt<?").run(agora - 7 * 86400000);
+    }
     for (const [id, entry] of aoVivo) if (!entry.paused) void editar(id, entry);
   }, INTERVALO);
   timer.unref();

@@ -66,8 +66,8 @@ const client = new Client({
 client.setMaxListeners(32);
 
 anticrash.bindClient(client);
-require("./voice-presence")({client});
-require("./call-panel")({client,env:process.env});
+const voicePresence = require("./voice-presence")({client});
+const painelCalls = require("./call-panel")({client,env:process.env});
 
 const commands = require("./command-system/registry").getCommandRegistry(client, {
   deny: responderSemPermissao
@@ -253,7 +253,7 @@ const backupsServidor = require("./backups")({
 const painelUnmute = require("./unmute")({ client, registry: commands });
 const nukeCanal = require("./nuke")({ client, registry: commands, botConfig: backupsServidor.botConfig, mediaModeration: protecaoMidia });
 const serverLogs = require("./server-logs")({ client, db: horasCall.store.db, registry: commands });
-require("./boost-logs")({ client, db: horasCall.store.db, registry: commands, ensureLogs: serverLogs.ensureGuild });
+const boostSystem = require("./boost-logs")({ client, db: horasCall.store.db, registry: commands, ensureLogs: serverLogs.ensureGuild });
 const bansSystem=require("./ban-management")({ client, db: horasCall.store.db, registry: commands });
 moderationGuard.configureHistory(fichaCargos);
 
@@ -2790,36 +2790,16 @@ client.on("channelDelete", canal => {
 
   client.once("clientReady", () => {
   console.log(`Bot conectado como ${client.user.tag}`);
-  let mostrandoServidores = false;
-  const atualizarStatus = async () => {
-    mostrandoServidores = !mostrandoServidores;
-    // O valor inicial considera 13 servidores já existentes; novos servidores
-    // entram na contagem conforme o bot recebe guildCreate.
-    const quantidadeServidores =
-      process.env.NODE_ENV === "test"
-        ? client.guilds.cache.size
-        : Math.max(13, client.guilds.cache.size);
-    const quantidadeUsuarios = client.guilds.cache.reduce(
-      (total, guild) => total + (guild.memberCount || 0),
-      0
-    );
-    const rotulo = mostrandoServidores
-      ? `${quantidadeServidores} ${quantidadeServidores === 1 ? "servidor" : "servidores"}`
-      : `${quantidadeUsuarios} ${quantidadeUsuarios === 1 ? "usuário" : "usuários"}`;
-    try {
-      await client.user.setPresence({
-        status: "idle",
-        activities: []
-      });
-    } catch (error) {
+  // Presença fixa: alternar o status a cada 30 s gastava chamadas Discord sem
+  // produzir atividade visível.
+  try {
+    const presenca = client.user.setPresence({ status: "idle", activities: [] });
+    if (presenca?.catch) presenca.catch(error => {
       console.error("[Status] Não foi possível atualizar a presença:", error.message);
-    }
-  };
-  if (typeof setInterval === "function") {
-    const intervaloStatus = setInterval(() => void atualizarStatus(), 30_000);
-    intervaloStatus?.unref?.();
+    });
+  } catch (error) {
+    console.error("[Status] Não foi possível atualizar a presença:", error.message);
   }
-  void atualizarStatus();
   podarPaineisAntigos();
   recuperarExpiracoesPaineisCargos();
   recuperarFechamentosPendentes();
@@ -2854,8 +2834,22 @@ const configuracaoLumiya=require("./configuration")({
     }}
   ]
 });
-horasCall.beforeShutdown(()=>configuracaoLumiya.close());
-horasCall.beforeShutdown(()=>filaSalvamento);
+for (const fechar of [
+  () => filaSalvamento,
+  configuracaoLumiya.close,
+  nicknameSystem.close,
+  roleWhitelist.close,
+  backupsServidor.close,
+  centralComandos.close,
+  moderationGuard.close,
+  fichaCargos.close,
+  rankingsSystem.close,
+  autoCallsSystem.close,
+  boostSystem.close,
+  painelCalls.close,
+  voicePresence.close,
+  nukeCanal.close
+]) if (typeof fechar === "function") horasCall.beforeShutdown(fechar);
 commands.loadDirectory(path.join(__dirname, "commands"), { horasCall, fichaCargos });
 
 client.login(process.env.DISCORD_TOKEN).catch(error => anticrash.loginFailure(error));

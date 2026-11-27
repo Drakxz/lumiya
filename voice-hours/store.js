@@ -36,6 +36,13 @@ class VoiceHoursStore {
         startAt INTEGER NOT NULL, endAt INTEGER NOT NULL
       );
       CREATE INDEX IF NOT EXISTS voice_segments_user ON voice_segments(guildId, userId, endAt);
+      CREATE INDEX IF NOT EXISTS voice_segments_time ON voice_segments(endAt);
+      CREATE TABLE IF NOT EXISTS voice_rollups (
+        guildId TEXT NOT NULL, userId TEXT NOT NULL, weekStart INTEGER NOT NULL,
+        channelId TEXT NOT NULL, muted INTEGER NOT NULL, ms INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (guildId, userId, weekStart, channelId, muted)
+      );
+      CREATE INDEX IF NOT EXISTS voice_rollups_week ON voice_rollups(weekStart);
     `);
     const setting = this.db.prepare("SELECT value FROM metadata WHERE key = 'timezone'").get();
     if (setting && setting.value !== "America/Sao_Paulo:UTC-03") throw new Error("Fuso do banco de horas incompatível.");
@@ -60,6 +67,11 @@ class VoiceHoursStore {
     this.sumEligible = this.db.prepare(`SELECT COALESCE(SUM(endAt - MAX(startAt, ?)), 0) AS ms
       FROM voice_segments WHERE guildId = ? AND userId = ? AND endAt > ?
       AND (? = 1 OR muted = 0) AND channelId NOT IN (SELECT value FROM json_each(?))`);
+    this.sumEligibleRollup = this.db.prepare(`SELECT COALESCE(SUM(ms), 0) AS ms FROM voice_rollups
+      WHERE guildId = ? AND userId = ? AND weekStart + ? > ?
+      AND (? = 1 OR muted = 0) AND channelId NOT IN (SELECT value FROM json_each(?))`);
+    this.upsertRollup = this.db.prepare(`INSERT INTO voice_rollups VALUES (?, ?, ?, ?, ?, ?)
+      ON CONFLICT(guildId, userId, weekStart, channelId, muted) DO UPDATE SET ms = ms + excluded.ms`);
     this.remove = this.db.prepare("DELETE FROM active WHERE guildId = ? AND userId = ?");
     this.upsert = this.db.prepare(`INSERT INTO active VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(guildId, userId) DO UPDATE SET channelId = excluded.channelId, muted = excluded.muted,
@@ -105,12 +117,33 @@ class VoiceHoursStore {
     });
   }
 
+  // Agrega segmentos fechados de semanas anteriores e libera o espaço no SQLite.
+  rollup(now = Date.now()) {
+    return this.transaction(() => {
+      const cutoff = weekStart(now);
+      const rows = this.db.prepare("SELECT guildId,userId,channelId,muted,startAt,endAt FROM voice_segments WHERE endAt < ?").all(cutoff);
+      if (!rows.length) return 0;
+      const groups = new Map();
+      for (const row of rows) {
+        const key = [row.guildId, row.userId, weekStart(row.endAt - 1), row.channelId, row.muted].join("|");
+        groups.set(key, (groups.get(key) || 0) + Math.max(0, row.endAt - row.startAt));
+      }
+      for (const [key, ms] of groups) {
+        const [guildId, userId, week, channelId, muted] = key.split("|");
+        this.upsertRollup.run(guildId, userId, Number(week), channelId, Number(muted), ms);
+      }
+      this.db.prepare("DELETE FROM voice_segments WHERE endAt < ?").run(cutoff);
+      return rows.length;
+    });
+  }
+
   checkpoint(now = Date.now()) {
     this.transaction(() => {
       for (const row of this.allActive.all()) this.accumulate(row, now);
       this.db.prepare("INSERT INTO metadata VALUES ('currentWeekStart', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value")
         .run(String(weekStart(now)));
     });
+    this.rollup(now);
   }
 
   stopGuild(guildId, now = Date.now()) {
@@ -154,12 +187,15 @@ class VoiceHoursStore {
   eligible(guildId, userId, { since = 0, countMuted = true, excluded = [] } = {}, now = Date.now()) {
     return this.transaction(() => {
       this.accumulate(this.getActive.get(guildId, userId), now);
-      return this.sumEligible.get(since, guildId, userId, since, countMuted ? 1 : 0, JSON.stringify(excluded)).ms;
+      const segments = this.sumEligible.get(since, guildId, userId, since, countMuted ? 1 : 0, JSON.stringify(excluded)).ms;
+      const rollups = this.sumEligibleRollup.get(guildId, userId, WEEK_MS, since, countMuted ? 1 : 0, JSON.stringify(excluded)).ms;
+      return segments + rollups;
     });
   }
 
   close(now = Date.now()) {
     this.checkpoint(now);
+    this.db.exec("PRAGMA wal_checkpoint(TRUNCATE)");
     this.db.close();
   }
 }

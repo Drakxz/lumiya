@@ -167,3 +167,16 @@ test("renderer draws animated GIF avatars served through the Discord media proxy
   assert.match(fetched.url, /a_hash\.gif/);
   assert.equal(fetched.options.redirect, "follow");
 });
+
+test("rollup agrega semanas antigas sem alterar a elegibilidade", t => {
+  const s = memory(t);
+  const inicio = MONDAY - WEEK_MS - 60_000;
+  s.update(state(), inicio);
+  s.update(state(false, null), inicio + 60_000);
+  assert.equal(s.eligible("guild", "user", {}, inicio + 60_000), 60_000);
+  assert.equal(s.rollup(MONDAY), 1);
+  assert.equal(s.db.prepare("SELECT COUNT(*) AS n FROM voice_segments").get().n, 0);
+  assert.equal(s.db.prepare("SELECT COUNT(*) AS n FROM voice_rollups").get().n, 1);
+  assert.equal(s.eligible("guild", "user", {}, MONDAY), 60_000);
+  assert.equal(s.eligible("guild", "user", { excluded: ["voice"] }, MONDAY), 0);
+});
