@@ -22,7 +22,7 @@ class RoleWhitelistStore{
     CREATE TABLE IF NOT EXISTS role_wl_role_presets(guildId TEXT NOT NULL,roleId TEXT NOT NULL,presetId TEXT NOT NULL,
       PRIMARY KEY(guildId,roleId));
   `);this.expireAll();}
-  config(guildId){const row=this.db.prepare("SELECT data FROM role_wl_config WHERE guildId=?").get(guildId);const data=row?JSON.parse(row.data):{};return {hierarchy:[],...data,hierarchy:Array.isArray(data.hierarchy)?data.hierarchy:[],adminIds:Array.isArray(data.adminIds)?data.adminIds:[]};}
+  config(guildId){const row=this.db.prepare("SELECT data FROM role_wl_config WHERE guildId=?").get(guildId);const data=row?JSON.parse(row.data):{};return {...data,hierarchy:Array.isArray(data.hierarchy)?data.hierarchy:[],adminIds:Array.isArray(data.adminIds)?data.adminIds:[]};}
   saveConfig(guildId,config,actorId){this.db.prepare("INSERT INTO role_wl_config VALUES(?,?,?,?) ON CONFLICT(guildId) DO UPDATE SET data=excluded.data,updatedAt=excluded.updatedAt,updatedBy=excluded.updatedBy").run(guildId,JSON.stringify(config),Date.now(),actorId);}
   transaction(work){this.db.exec("BEGIN IMMEDIATE");try{const value=work();this.db.exec("COMMIT");return value;}catch(error){this.db.exec("ROLLBACK");throw error;}}
   isAdmin(guild,member){const c=this.config(guild.id);return Boolean(member?.id===guild.ownerId||c.adminIds.includes(member?.id));}

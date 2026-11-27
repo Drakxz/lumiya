@@ -5,6 +5,8 @@ node_modules/
 .env
 .env.*
 !.env.example
+.npmrc
+.pnpm-store/
 *.pem
 *.key
 *.p12
@@ -12,18 +14,24 @@ node_modules/
 *.crt
 *.cer
 *.der
+*.jks
+*.keystore
+*.mobileprovision
 
 # Bancos de dados, cofres e estado local
-database/*.sqlite
-database/*.sqlite-*
-database/*.db
-database/*.db-*
-database/call-vault.key
-database/call-accounts.enc*
-database/instagram-web-private/
+*.sqlite
+*.sqlite-*
+*.db
+*.db-*
+*.sql
+*.dump
 *.mdsbak
 *.enc
 *.enc.*
+database/call-vault.key
+database/call-accounts.enc*
+database/instagram-web-private/
+uploads/
 data.json
 data.json.tmp
 role-history.json
@@ -32,6 +40,9 @@ state/
 
 # Backups com dados reais (o código-fonte em backups/ permanece)
 backups/files/
+backups/*.zip
+backups/*.tar
+backups/*.gz
 backups/keep-online-task-*
 backups/panel-images-*
 
@@ -45,14 +56,19 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
-# Frontend compilado e artefatos de teste
+# Build, cobertura e artefatos de teste
+dist/
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+*.tsbuildinfo
 instagram-web/frontend/dist/
-instagram-web/frontend/*.tsbuildinfo
 instagram-web/frontend/test-results/
 instagram-web/frontend/playwright-report/
-instagram-web/frontend/node_modules/
 
 # Ferramentas locais
 .impeccable/
-.vscode/
 .idea/
+.vscode/*
+!.vscode/extensions.json
