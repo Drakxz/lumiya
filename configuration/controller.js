@@ -5,6 +5,7 @@ const {
 const {privateCommand,panelsForSystem}=require("./systems");
 const {validate,emoji}=require("./render");
 const {safeURL,download,sanitize}=require("./assets");
+const {safeMessage}=require("../error-ui");
 const ui=require("./ui");
 module.exports=function createController(deps){
   const {client,commands,store,panels,publisher,systems,apis,member,audit,context,access}=deps;
@@ -56,8 +57,7 @@ module.exports=function createController(deps){
   ];
   async function respondError(i,error){
     console.warn("[Central Lumiya] Interação não concluída:",error.code||error.name);
-    const payload=errorCard(error.public===false||["TypeError","RangeError","SyntaxError"].includes(error.name)?
-      "Não foi possível concluir a operação. Atualize a tela ou abra /config novamente.":error.message||"Tente novamente em instantes.");
+    const payload=errorCard(safeMessage(error));
     if(i.deferred||i.replied)await i.followUp(payload).catch(()=>{});
     else await i.reply(payload).catch(()=>{});
   }

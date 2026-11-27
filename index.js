@@ -272,12 +272,18 @@ async function voltarDaFichaParaGerenciamento(interaction, painelId) {
   await interaction.deleteReply();
 }
 
+let filaSalvamento = Promise.resolve();
 function salvarDados() {
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(dados, null, 2), "utf8");
-  } catch (error) {
-    console.error("Não foi possível salvar data.json:", error);
-  }
+  filaSalvamento = filaSalvamento.then(() => {
+    try {
+      const temporario = `${DATA_FILE}.tmp-${process.pid}`;
+      fs.writeFileSync(temporario, JSON.stringify(dados, null, 2), "utf8");
+      fs.renameSync(temporario, DATA_FILE);
+    } catch (error) {
+      console.error("Não foi possível salvar data.json:", error);
+    }
+  });
+  return filaSalvamento;
 }
 
 function limparDadosTicket(canalId) {
@@ -391,23 +397,8 @@ function responderSemPermissao(origem) {
 
 function obterInfoTicket(canal) {
   const salvo = dados.tickets[canal?.id];
-  if (salvo?.donoId && ["support", "migration"].includes(salvo.sistema)) {
-    return { sistema: salvo.sistema, donoId: salvo.donoId };
-  }
-
-  const topico = canal?.topic ?? "";
-
-  if (topico.startsWith("ticket-owner:")) {
-    const donoId = topico.slice("ticket-owner:".length);
-    if (donoId) return { sistema: "support", donoId };
-  }
-
-  if (topico.startsWith("migration-owner:")) {
-    const donoId = topico.slice("migration-owner:".length);
-    if (donoId) return { sistema: "migration", donoId };
-  }
-
-  return null;
+  if (!salvo?.donoId || !["support", "migration"].includes(salvo.sistema)) return null;
+  return { sistema: salvo.sistema, donoId: salvo.donoId };
 }
 
 async function localizarTicketAberto(guild, sistema, donoId, tipo = null) {
@@ -1767,6 +1758,14 @@ async function comandoTicketStats(message){
 }
 commands.register({name:"ticketstats",description:"Consulta metas e tickets concluídos na semana atual.",category:"Suporte",authorize:member=>Boolean(member?.guild&&(gestaoTickets.access(member.guild,member).support||gestaoTickets.access(member.guild,member).migration)),permissionLabel:"Gestão de Tickets da área autorizada",result:"Mostra metas e atendimentos semanais por membro.",prefix:{trigger:"!ticketstats",exact:false,usage:["!ticketstats","!ticketstats @membro"],execute:comandoTicketStats}});
 
+async function podeConfigurarMeta(interaction){
+  if(interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild))return true;
+  const autorizados=dados.ticketConfigRoles[interaction.guildId]||[];
+  if(!autorizados.length)return false;
+  const membro=await interaction.guild.members.fetch({user:interaction.user.id,force:true}).catch(()=>null);
+  return autorizados.some(id=>membro?.roles?.cache?.has?.(id));
+}
+
 client.on("interactionCreate",async interaction=>{
   if(interaction.inGuild?.()&&interaction.customId?.startsWith('ticket-config-')&&
     !['ticket-config-goal','ticket-config-goal-role'].includes(interaction.customId)&&!interaction.customId.startsWith('ticket-config-goal-modal:')){
@@ -1781,16 +1780,12 @@ client.on("interactionCreate",async interaction=>{
     return interaction.reply({components:[new ContainerBuilder().setAccentColor(COR_TICKET).addTextDisplayComponents(new TextDisplayBuilder().setContent(`# Cargos para assumir ${system==="support"?"suporte":"migração"}\nSelecione os cargos autorizados. Limpar a seleção restringe o atendimento à gestão da área e administração geral.`)).addActionRowComponents(new ActionRowBuilder().addComponents(select))],flags:FLAGS_EFEMERO_V2,allowedMentions:{parse:[]}});
   }
   if(interaction.inGuild?.()&&interaction.isButton?.()&&interaction.customId==="ticket-config-goal"){
-    const canConfigure=interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)||
-      (dados.ticketConfigRoles[interaction.guildId]||[]).some(id=>interaction.member?.roles?.cache?.has(id));
-    if(!canConfigure)return interaction.reply({content:"Você não tem o cargo autorizado a configurar a meta de tickets.",flags:MessageFlags.Ephemeral});
+    if(!await podeConfigurarMeta(interaction))return interaction.reply({content:"Você não tem o cargo autorizado a configurar a meta de tickets.",flags:MessageFlags.Ephemeral});
     const selector=new RoleSelectMenuBuilder().setCustomId("ticket-config-goal-role").setPlaceholder("Escolha até 5 cargos").setMinValues(1).setMaxValues(5);
     return interaction.reply({components:[new ContainerBuilder().setAccentColor(COR_TICKET).addTextDisplayComponents(new TextDisplayBuilder().setContent("# Metas individuais por cargo\nEscolha até 5 cargos. O próximo formulário terá um campo de meta independente para cada cargo. Use 0 para remover a meta daquele cargo.")).addActionRowComponents(new ActionRowBuilder().addComponents(selector))],flags:FLAGS_EFEMERO_V2,allowedMentions:{parse:[]}});
   }
   if(interaction.inGuild?.()&&interaction.isModalSubmit?.()&&interaction.customId.startsWith("ticket-config-goal-modal:")){
-    const canConfigure=interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)||
-      (dados.ticketConfigRoles[interaction.guildId]||[]).some(id=>interaction.member?.roles?.cache?.has(id));
-    if(!canConfigure)return interaction.reply({content:"Você não tem o cargo autorizado a configurar a meta de tickets.",flags:MessageFlags.Ephemeral});
+    if(!await podeConfigurarMeta(interaction))return interaction.reply({content:"Você não tem o cargo autorizado a configurar a meta de tickets.",flags:MessageFlags.Ephemeral});
     const token=interaction.customId.split(":")[1],selection=selecoesMetaCargo.get(token);
         if(!selection||selection.guildId!==interaction.guildId||selection.userId!==interaction.user.id||Date.now()-selection.createdAt>10*60*1000){selecoesMetaCargo.delete(token);return interaction.reply({content:errorText("A seleção de cargos expirou. Abra novamente o painel de metas."),flags:MessageFlags.Ephemeral});}
     selecoesMetaCargo.delete(token);
@@ -1817,8 +1812,7 @@ client.on("interactionCreate",async interaction=>{
       return interaction.reply({content:id?`O cargo <@&${id}> agora pode configurar a meta de tickets.`:"Cargo removido. Somente administradores podem configurar a meta.",allowedMentions:{parse:[],roles:[]},flags:MessageFlags.Ephemeral});
     }
     if(interaction.customId==="ticket-config-goal-role"){
-      const canConfigure=interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)||(dados.ticketConfigRoles[interaction.guildId]||[]).some(id=>interaction.member?.roles?.cache?.has(id));
-      if(!canConfigure)return interaction.reply({content:"Você não tem autorização para configurar metas de tickets.",flags:MessageFlags.Ephemeral});
+      if(!await podeConfigurarMeta(interaction))return interaction.reply({content:"Você não tem autorização para configurar metas de tickets.",flags:MessageFlags.Ephemeral});
       const roles=[];for(const roleId of interaction.values){const role=await interaction.guild.roles.fetch(roleId).catch(()=>null);if(role&&role.id!==interaction.guildId&&!role.managed)roles.push(role);}
       if(!roles.length)return interaction.reply({content:"Selecione ao menos um cargo comum deste servidor.",flags:MessageFlags.Ephemeral});
       const token=randomUUID();selecoesMetaCargo.set(token,{guildId:interaction.guildId,userId:interaction.user.id,roleIds:roles.map(role=>role.id),createdAt:Date.now()});
@@ -2861,6 +2855,7 @@ const configuracaoLumiya=require("./configuration")({
   ]
 });
 horasCall.beforeShutdown(()=>configuracaoLumiya.close());
+horasCall.beforeShutdown(()=>filaSalvamento);
 commands.loadDirectory(path.join(__dirname, "commands"), { horasCall, fichaCargos });
 
 client.login(process.env.DISCORD_TOKEN).catch(error => anticrash.loginFailure(error));

@@ -31,3 +31,16 @@ test("success, cancellation, configuration and neutral review are not marked as 
     "# Sucesso\nSomente administradores podem alterar a configuração."
   ]) assert.equal(statusText(text), text);
 });
+
+test("safeMessage mantém mensagens amigáveis e esconde detalhes internos",()=>{
+  const {safeMessage}=require("../error-ui");
+  assert.equal(safeMessage(new Error("Canal inválido neste servidor.")),"Canal inválido neste servidor.");
+  assert.equal(safeMessage(Object.assign(new Error("Cota excedida."),{public:true})),"Cota excedida.");
+  for(const message of [
+    "SQLITE_ERROR: no such table at C:\\Users\\starfield\\mds-bot\\database\\bot.db",
+    "HTTP 429 · sk-proj-secret",
+    "connect ECONNREFUSED 10.0.0.1:3000",
+    "Bearer secrettoken value",
+    "Não foi possível: <@123456789012345678>"
+  ]) assert.doesNotMatch(safeMessage(new Error(message)),/SQLITE|sk-proj|ECONN|Bearer|123456789012345678/);
+});

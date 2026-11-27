@@ -18,7 +18,7 @@ const {channelScope,isThread}=require("./channel-scope");
 const {createCrossReview}=require("./cross-review");
 const {createSuperficial}=require("./superficial");
 const {serverName}=require("../brand");
-const {errorText,statusText}=require("../error-ui");
+const {errorText,statusText,safeMessage}=require("../error-ui");
 const painelEmojis=require("../lumiya-ui/emojis");
 
 const TEMP_ROOT=path.join(process.platform==="win32"?path.join(os.tmpdir(),"opencode"):os.tmpdir(),"mds-media-moderation");
@@ -512,7 +512,7 @@ module.exports=function installMediaModeration({client,registry,db,moderationPro
       // Await the whole dispatch, including returned promises from helpers and
       // Discord replies. Expected operational failures must not reach anticrash.
       try{
-        const p=payload(componentsError("Ação não concluída",error.message||"Erro interno."),true);
+        const p=payload(componentsError("Ação não concluída",safeMessage(error)),true);
         await (i.deferred||i.replied?i.followUp(p):i.reply(p));
       }catch{console.warn("[Moderação de mídia] Não foi possível informar a falha da interação; o bot continua ativo.");}
     }

@@ -10,7 +10,7 @@ const {
 const {encode,decode}=require("./archive");
 const engine=require("./engine");
 const {serverName}=require("../brand");
-const {errorText,statusText}=require("../error-ui");
+const {errorText,statusText,safeMessage}=require("../error-ui");
 const painelEmojis=require("../lumiya-ui/emojis");
 
 module.exports=function installBackups({client,registry,db,botData,dataFile,restorePanels}){
@@ -404,7 +404,7 @@ module.exports=function installBackups({client,registry,db,botData,dataFile,rest
     }catch(error){
       console.error("[Backups] Erro na operação:",error);
       if(ctx?.s)try{audit(ctx.s.guildId,i.user.id,"operation-failed",{action,error:String(error.message||error).slice(0,500)});}catch{}
-      const msg=box(null,`# Operação não concluída\n${String(error.message||error).slice(0,1200)}`,0);
+      const msg=box(null,`# Operação não concluída\n${safeMessage(error)}`,0);
       if(i.deferred&&i.message?.edit)await i.message.edit(payload(msg)).catch(()=>{});
       else if(i.isRepliable())await i.reply(payload(msg,true)).catch(()=>{});
     }

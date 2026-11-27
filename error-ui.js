@@ -21,4 +21,16 @@ function statusText(value) {
   return panelText(marked);
 }
 
-module.exports = { DENIED_EMOJI, errorText, statusText };
+// Mensagens de erro exibidas ao usuário: apenas texto curto e controlado.
+// Erros internos (SQL, HTTP, caminhos, tokens) ficam somente no console.
+function safeMessage(error) {
+  if (error?.public === false || ["TypeError", "RangeError", "SyntaxError"].includes(error?.name))
+    return "Não foi possível concluir a operação. Tente novamente em instantes.";
+  const message = String(error?.message || "");
+  if (error?.public === true) return message.slice(0, 300) || "Tente novamente em instantes.";
+  const risky = /(?:https?:\/\/|sk-|Bearer|SELECT\s|INSERT\s|UPDATE\s|DELETE\s|SQLITE|ECONN|ETIMEDOUT|HTTP\s\d{3}|[A-Z]:\\|\/home\/|\b\d{17,20}\b)/i.test(message);
+  if (!risky && message.length <= 160 && /^[\p{L}\p{N}\s.,!?;:()\-/À-ÿ]+$/u.test(message)) return message;
+  return "Não foi possível concluir a operação. Tente novamente em instantes.";
+}
+
+module.exports = { DENIED_EMOJI, errorText, statusText, safeMessage };

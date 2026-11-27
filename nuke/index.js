@@ -13,6 +13,12 @@ const TIPOS = [ChannelType.GuildText, ChannelType.GuildAnnouncement];
 module.exports = function installNuke({ client, registry, botConfig, mediaModeration, logger = console }) {
   const text = value => new TextDisplayBuilder().setContent(statusText(value));
   const sep = () => new SeparatorBuilder().setDivider(true);
+  const emExecucao = new Set();
+  const mensagemPublica = error => {
+    const known = /^(?:Já existe um nuke|O canal não existe mais\.)/.test(String(error?.message || ""));
+    return known ? String(error.message).slice(0, 200)
+      : "Não foi possível concluir o nuke. Verifique as permissões e tente novamente.";
+  };
 
   function card(titulo, corpo) {
     return require("../lumiya-ui/canonical").canonical({
@@ -31,6 +37,10 @@ module.exports = function installNuke({ client, registry, botConfig, mediaModera
   }
 
   async function executar(guild, canal, autorId) {
+    const chave = `${guild.id}:${canal.id}`;
+    if (emExecucao.has(chave)) throw new Error("Já existe um nuke em andamento para este canal.");
+    emExecucao.add(chave);
+    try {
     const antigo = await guild.channels.fetch(canal.id);
     if (!antigo || antigo.guildId !== guild.id) throw new Error("O canal não existe mais.");
     const estado = {
@@ -85,6 +95,9 @@ module.exports = function installNuke({ client, registry, botConfig, mediaModera
     await restoreMedia();
     if (mediaError) configurationErrors.push(`Proteção de imagens: ${mediaError.message}`);
     return { antigo, novo, mediaResult, mediaSnapshot, configurationErrors };
+    } finally {
+      emExecucao.delete(chave);
+    }
   }
 
   function restorationSummary(result) {
@@ -150,7 +163,7 @@ module.exports = function installNuke({ client, registry, botConfig, mediaModera
       return await message.reply(payload);
     } catch (error) {
       logger.warn?.("[Nuke] Falha ao executar:", error.message);
-      return message.reply({ content: errorText(`Nuke não concluído: ${String(error.message).slice(0, 400)}`), allowedMentions: { parse: [] } }).catch(() => {});
+      return message.reply({ content: errorText(`Nuke não concluído: ${mensagemPublica(error)}`), allowedMentions: { parse: [] } }).catch(() => {});
     }
   }
 
@@ -171,7 +184,7 @@ module.exports = function installNuke({ client, registry, botConfig, mediaModera
         (published ? "" : "\nNão foi possível publicar o aviso no novo canal.")));
     } catch (error) {
       logger.warn?.("[Nuke] Falha ao executar:", error.message);
-      await i.editReply(card("Nuke não concluído", `-# ${String(error.message).slice(0, 400)}`)).catch(() => {});
+      await i.editReply(card("Nuke não concluído", `-# ${mensagemPublica(error)}`)).catch(() => {});
     }
   }
 

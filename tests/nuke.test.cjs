@@ -314,3 +314,12 @@ test("a new image message is captured by the actual moderation handler immediate
   assert.equal(rows[0].channelId, f.novo.id);
   assert.equal(rows[0].status, "review");
 });
+
+test("nuke serializa execuções concorrentes no mesmo canal", async t => {
+  const f = fixture(t);
+  const first = f.api.executar(f.guild, f.antigo, "admin");
+  await assert.rejects(f.api.executar(f.guild, f.antigo, "outro"), /Já existe um nuke/);
+  await first;
+  assert.equal(f.events.filter(([name]) => name === "delete").length, 1);
+  assert.equal(f.events.filter(([name]) => name === "create").length, 1);
+});
